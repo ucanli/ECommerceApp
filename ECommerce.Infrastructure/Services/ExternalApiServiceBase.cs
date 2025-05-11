@@ -42,7 +42,7 @@ namespace ECommerce.Infrastructure.Services
                 await using var stream = await response.Content.ReadAsStreamAsync();
                 var apiResponse = await JsonSerializer.DeserializeAsync<ApiResponse<T>>(stream, _serializerOptions);
 
-                if (apiResponse == null || apiResponse?.Success == false || apiResponse.Data == null)
+                if (apiResponse == null || apiResponse.Success == false || apiResponse.Data == null)
                 {
                     return default;
                 }

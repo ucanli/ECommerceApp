@@ -24,5 +24,11 @@ namespace ECommerce.Infrastructure.Repositories
             _orders[order.Id] = order;
             return Task.CompletedTask;
         }
+
+        public Task DeleteAsync(string id)
+        {
+            _orders.Remove(id);
+            return Task.CompletedTask;
+        }
     }
 }

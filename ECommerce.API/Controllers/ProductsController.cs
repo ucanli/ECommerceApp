@@ -2,6 +2,7 @@
 using ECommerce.API.DTOs;
 using ECommerce.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace ECommerce.API.Controllers
 {
@@ -19,6 +20,9 @@ namespace ECommerce.API.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(List<ProductResponseDto>), 200)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
             var productDtos = await _productManager.GetProductsAsync();
