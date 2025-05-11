@@ -1,22 +1,15 @@
 using ECommerce.API.Settings;
 using ECommerce.Application.Interfaces.External;
 using ECommerce.Infrastructure.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.OpenApi.Models;
 using Polly;
-using Polly.CircuitBreaker;
-//using Polly;
-//using Polly.CircuitBreaker;
-//using Polly.Retry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var appSettings = builder.Configuration
     .Get<AppSettings>();
 
-Console.WriteLine("appSettings?.BalanceManagementApiBaseUrl");
-Console.WriteLine(appSettings?.BalanceManagementApiBaseUrl);
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -30,31 +23,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Backend system for processing orders with Balance Management integration."
     });
 });
-
-//// Resilience pipeline
-//builder.Services.AddResiliencePipeline("resilience-pipeline", pipelineBuilder =>
-//{
-//    //Retry: 3 kez 200 milisaniye aralýkla dene
-//    pipelineBuilder.AddRetry(new RetryStrategyOptions
-//    {
-//        ShouldHandle = args => ValueTask.FromResult(args.Outcome.Exception != null),
-//        MaxRetryAttempts = 3,
-//        Delay = TimeSpan.FromMilliseconds(200)
-//    });
-
-//    //Timeout: 5 saniye sonra isteði iptal et
-//    pipelineBuilder.AddTimeout(TimeSpan.FromSeconds(5));
-
-//    //Circuit Breaker: 30 saniyede 10 çaðrýdan %50'si hatalýysa, 15 saniye boyunca trafiði kes
-//    pipelineBuilder.AddCircuitBreaker(new CircuitBreakerStrategyOptions
-//    {
-//        FailureRatio = 0.5,
-//        SamplingDuration = TimeSpan.FromSeconds(30),
-//        MinimumThroughput = 10,
-//        BreakDuration = TimeSpan.FromSeconds(15)
-//    });
-
-//});
 
 
 builder.Services.AddHttpClient("balance-management-api", (serviceProvider, client) =>
@@ -107,6 +75,7 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
     });
 
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IBalanceService, BalanceService>();
 
 var app = builder.Build();
 

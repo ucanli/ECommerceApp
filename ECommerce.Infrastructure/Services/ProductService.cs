@@ -1,4 +1,5 @@
-﻿using ECommerce.Application.DTOs.BalanceApi;
+﻿using ECommerce.Application.DTOs;
+using ECommerce.Application.DTOs.BalanceApi;
 using ECommerce.Application.Interfaces.External;
 using Microsoft.Extensions.Logging;
 
@@ -47,12 +48,6 @@ namespace ECommerce.Infrastructure.Services
                 _logger.LogError(ex, $"Failed to fetch products. ErrorMessage: {ex.Message}");
                 return new List<BalanceApiProductDto>();
             }
-        }
-
-        private class ApiResponse<T>
-        {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
         }
     }
 }
