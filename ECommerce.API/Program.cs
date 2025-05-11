@@ -1,5 +1,7 @@
 using ECommerce.API.Settings;
 using ECommerce.Application.Interfaces.External;
+using ECommerce.Application.Interfaces.Services;
+using ECommerce.Application.Services;
 using ECommerce.Infrastructure.Services;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.OpenApi.Models;
@@ -74,8 +76,13 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
         });
     });
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBalanceService, BalanceService>();
+builder.Services.AddScoped<IProductManager, ProductManager>();
+
+
 
 var app = builder.Build();
 

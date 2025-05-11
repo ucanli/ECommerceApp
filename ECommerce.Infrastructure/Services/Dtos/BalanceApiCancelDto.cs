@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECommerce.Application.DTOs.BalanceApi
+namespace ECommerce.Infrastructure.Services.Dtos
 {
-    public class BalanceApiCompleteDto
+    public class BalanceApiCancelDto
     {
         public BalanceApiOrderDto Order { get; set; }
         public BalanceApiUserBalanceDto UpdatedBalance { get; set; }

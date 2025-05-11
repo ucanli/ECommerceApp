@@ -1,15 +1,10 @@
-﻿using ECommerce.Application.DTOs;
-using ECommerce.Application.DTOs.BalanceApi;
+﻿using AutoMapper;
+using ECommerce.Application.Dtos;
 using ECommerce.Application.Interfaces.External;
+using ECommerce.Infrastructure.Services.Dtos;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace ECommerce.Infrastructure.Services
 {
@@ -18,15 +13,17 @@ namespace ECommerce.Infrastructure.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ProductService> _logger;
 
-        public BalanceService(IHttpClientFactory httpClientFactory, ILogger<ProductService> logger)
+        private readonly IMapper _mapper;
+
+        public BalanceService(IHttpClientFactory httpClientFactory, ILogger<ProductService> logger, IMapper mapper)
         {
             _httpClientFactory = httpClientFactory;
-
+            _mapper = mapper;
             _logger = logger;
         }
 
 
-        public async Task<BalanceApiUserBalanceDto> GetUserBalanceAsync()
+        public async Task<UserBalanceDto> GetUserBalanceAsync()
         {
             try
             {
@@ -46,19 +43,23 @@ namespace ECommerce.Infrastructure.Services
 
                     var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiUserBalanceDto>>(contentStream, options);
 
-                    return response?.Data ?? new BalanceApiUserBalanceDto();
+                    if (response?.Data != null)
+                    {
+                        var result = _mapper.Map<UserBalanceDto>(response.Data);
+                        return result;
+                    }
                 }
 
-                return new BalanceApiUserBalanceDto();
+                return new UserBalanceDto();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to fetch products. ErrorMessage: {ex.Message}");
-                return new BalanceApiUserBalanceDto();
+                return new UserBalanceDto();
             }
         }
 
-        public async Task<BalanceApiPreOrderDto> PrePrder(string orderId, decimal amount)
+        public async Task<PreOrderDto> PrePrder(string orderId, decimal amount)
         {
             try
             {
@@ -82,20 +83,24 @@ namespace ECommerce.Infrastructure.Services
 
                     var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiPreOrderDto>>(contentStream, options);
 
-                    return response?.Data ?? new BalanceApiPreOrderDto();
+                    if (response?.Data != null)
+                    {
+                        var result = _mapper.Map<PreOrderDto>(response.Data);
+                        return result;
+                    }
                 }
 
-                return new BalanceApiPreOrderDto();
+                return new PreOrderDto();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to post preorder. ErrorMessage: {ex.Message}");
-                return new BalanceApiPreOrderDto();
+                return new PreOrderDto();
             }
         }
 
 
-        public async Task<BalanceApiCompleteDto> Complete(string orderId)
+        public async Task<CompleteDto> Complete(string orderId)
         {
             try
             {
@@ -119,19 +124,23 @@ namespace ECommerce.Infrastructure.Services
 
                     var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiCompleteDto>>(contentStream, options);
 
-                    return response?.Data ?? new BalanceApiCompleteDto();
+                    if (response?.Data != null)
+                    {
+                        var result = _mapper.Map<CompleteDto>(response.Data);
+                        return result;
+                    }
                 }
 
-                return new BalanceApiCompleteDto();
+                return new CompleteDto();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to post complate. ErrorMessage: {ex.Message}");
-                return new BalanceApiCompleteDto();
+                return new CompleteDto();
             }
         }
 
-        public async Task<BalanceApiCancelDto> Cancel(string orderId)
+        public async Task<CancelDto> Cancel(string orderId)
         {
             try
             {
@@ -155,15 +164,20 @@ namespace ECommerce.Infrastructure.Services
 
                     var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiCancelDto>>(contentStream, options);
 
-                    return response?.Data ?? new BalanceApiCancelDto();
+
+                    if (response?.Data != null)
+                    {
+                        var result = _mapper.Map<CancelDto>(response.Data);
+                        return result;
+                    }
                 }
 
-                return new BalanceApiCancelDto();
+                return new CancelDto();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to post cancel. ErrorMessage: {ex.Message}");
-                return new BalanceApiCancelDto();
+                return new CancelDto();
             }
         }
 

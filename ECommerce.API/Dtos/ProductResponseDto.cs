@@ -1,8 +1,6 @@
-﻿
-
-namespace ECommerce.Application.DTOs.BalanceApi
+﻿namespace ECommerce.API.DTOs
 {
-    public class BalanceApiProductDto
+    public class ProductResponseDto
     {
         public string Id { get; set; } = null!;
         public string Name { get; set; } = null!;

@@ -1,4 +1,6 @@
-﻿using ECommerce.Application.Interfaces.External;
+﻿using AutoMapper;
+using ECommerce.API.DTOs;
+using ECommerce.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Controllers
@@ -7,18 +9,22 @@ namespace ECommerce.API.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductService _productService;
+        private readonly IProductManager _productManager;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductManager productManager, IMapper mapper)
         {
-            _productService = productService;
+            _productManager = productManager;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var products = await _productService.GetProductsAsync();
-            return Ok(products);
+            var productDtos = await _productManager.GetProductsAsync();
+            var response = _mapper.Map<List<ProductResponseDto>>(productDtos);
+
+            return Ok(response);
         }
     }
 }

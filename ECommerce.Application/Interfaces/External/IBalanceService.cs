@@ -1,12 +1,14 @@
-﻿using ECommerce.Application.DTOs.BalanceApi;
+﻿
+
+using ECommerce.Application.Dtos;
 
 namespace ECommerce.Application.Interfaces.External
 {
     public interface IBalanceService
     {
-        Task<BalanceApiUserBalanceDto> GetUserBalanceAsync();
-        Task<BalanceApiPreOrderDto> PrePrder(string orderId, decimal amount);
-        Task<BalanceApiCompleteDto> Complete(string orderId);
-        Task<BalanceApiCancelDto> Cancel(string orderId);
+        Task<UserBalanceDto> GetUserBalanceAsync();
+        Task<PreOrderDto> PrePrder(string orderId, decimal amount);
+        Task<CompleteDto> Complete(string orderId);
+        Task<CancelDto> Cancel(string orderId);
     }
 }

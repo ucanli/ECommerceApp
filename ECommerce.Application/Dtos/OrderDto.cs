@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ECommerce.Application.DTOs.BalanceApi
+namespace ECommerce.Application.Dtos
 {
-    public class BalanceApiOrderDto
+    public class OrderDto
     {
         public string OrderId { get; set; }
         public decimal Amount { get; set; }
@@ -16,6 +16,5 @@ namespace ECommerce.Application.DTOs.BalanceApi
         public string UserId { get; set; }
         public DateTime CompletedAt { get; set; }
         public DateTime CancelledAt { get; set; }
-
     }
 }
