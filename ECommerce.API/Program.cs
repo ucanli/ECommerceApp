@@ -9,8 +9,15 @@ using ECommerce.Infrastructure.Services;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.OpenApi.Models;
 using Polly;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day));
 
 var appSettings = builder.Configuration
     .Get<AppSettings>();
@@ -55,13 +62,13 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
         builder.AddRetry(new HttpRetryStrategyOptions
         {
             MaxRetryAttempts = 3,
-            Delay = TimeSpan.FromMilliseconds(200),
+            Delay = TimeSpan.FromSeconds(1),
             BackoffType = DelayBackoffType.Exponential,
             OnRetry = args =>
             {
-                Console.WriteLine($"[Retry Attempt {args.AttemptNumber}] at {DateTime.UtcNow}. Reason: {args.Outcome.Exception?.Message}");
+                Log.Information($"[Retry Attempt {args.AttemptNumber}] at {DateTime.UtcNow}. Reason: {args.Outcome.Exception?.Message}");
                 return default;
-            }
+            },
         });
 
         //Timeout
@@ -79,17 +86,17 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
                  .HandleResult(response => !response.IsSuccessStatusCode), // Includes non-successful responses
             OnOpened = args =>
             {
-                Console.WriteLine($"[Circuit OPENED] at {DateTime.UtcNow} due to: {args.Outcome.Exception?.Message}");
+                Log.Information($"[Circuit OPENED] at {DateTime.UtcNow} due to: {args.Outcome.Exception?.Message}");
                 return default;
             },
             OnClosed = args =>
             {
-                Console.WriteLine($"[Circuit CLOSED] at {DateTime.UtcNow}");
+                Log.Information($"[Circuit CLOSED] at {DateTime.UtcNow}");
                 return default;
             },
             OnHalfOpened = args =>
             {
-                Console.WriteLine($"[Circuit HALF-OPEN] at {DateTime.UtcNow}");
+                Log.Information($"[Circuit HALF-OPEN] at {DateTime.UtcNow}");
                 return default;
             }
         });
