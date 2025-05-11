@@ -80,7 +80,7 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.AddScoped<IOrderRepository, InMemoryOrderRepository>();
+builder.Services.AddSingleton<IOrderRepository, InMemoryOrderRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBalanceService, BalanceService>();
 builder.Services.AddScoped<IProductManager, ProductManager>();

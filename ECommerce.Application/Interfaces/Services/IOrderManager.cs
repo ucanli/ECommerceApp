@@ -6,5 +6,6 @@ namespace ECommerce.Application.Interfaces.Services
     public interface IOrderManager
     {
         Task<OrderDto> CreateOrderAsync(CreateOrderCommand command);
+        Task<CompleteDto> CompleteOrderAsync(string orderId);
     }
 }

@@ -4,6 +4,7 @@ using ECommerce.Application.Interfaces.External;
 using ECommerce.Application.Interfaces.Persistence;
 using ECommerce.Application.Interfaces.Services;
 using ECommerce.Domain.Entities;
+using ECommerce.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,6 +97,33 @@ namespace ECommerce.Application.Services
 
             return orderDto;
 
+        }
+
+        public async Task<CompleteDto> CompleteOrderAsync(string orderId)
+        {
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                throw new ArgumentException("Order not found");
+            }
+
+            if (order.Status != OrderStatus.Blocked)
+            {
+                throw new InvalidOperationException("Order is not in reserved");
+            }
+
+            var completeDto = await _balanceService.CompleteAsync(orderId);
+
+            if (completeDto == null)
+            {
+                throw new ArgumentException("order complate not successful");
+            }
+
+            order.Status = OrderStatus.Completed;
+
+            await _orderRepository.UpdateAsync(order);
+
+            return completeDto;
         }
     }
 }

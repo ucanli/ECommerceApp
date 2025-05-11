@@ -119,14 +119,17 @@ namespace ECommerce.Infrastructure.Services
 
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+                    var contentStream = await httpResponseMessage.Content.ReadAsStringAsync();
 
                     var options = new JsonSerializerOptions
                     {
-                        PropertyNameCaseInsensitive = true
+                        PropertyNameCaseInsensitive = true,
                     };
+                    options.Converters.Add(new JsonStringEnumConverter());
 
-                    var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiCompleteDto>>(contentStream, options);
+                    Console.WriteLine(contentStream);
+
+                    var response =  JsonSerializer.Deserialize<ApiResponse<BalanceApiCompleteDto>>(contentStream, options);
 
                     if (response?.Data != null)
                     {
@@ -159,14 +162,18 @@ namespace ECommerce.Infrastructure.Services
 
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+                    var contentStream = await httpResponseMessage.Content.ReadAsStringAsync();
 
                     var options = new JsonSerializerOptions
                     {
-                        PropertyNameCaseInsensitive = true
+                        PropertyNameCaseInsensitive = true,
                     };
+                    options.Converters.Add(new JsonStringEnumConverter());
 
-                    var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiCancelDto>>(contentStream, options);
+                    Console.WriteLine(contentStream);
+
+
+                    var response = JsonSerializer.Deserialize<ApiResponse<BalanceApiCancelDto>>(contentStream, options);
 
 
                     if (response?.Data != null)

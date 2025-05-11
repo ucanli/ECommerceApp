@@ -14,7 +14,9 @@ namespace ECommerce.API.Mapping
             CreateMap<ProductDto, ProductResponseDto>();
             CreateMap<OrderProductItemDto, OrderProductItem>();
             CreateMap<CreateOrderRequestDto, CreateOrderCommand>();
-            CreateMap<CreateOrderResponseDto, OrderDto>().ReverseMap();
+            CreateMap<OrderResponseDto, OrderDto>().ReverseMap();
+            CreateMap<UserBalanceResponseDto, UserBalanceDto>().ReverseMap();
+            CreateMap<CompleteOrderResponseDto, CompleteDto>().ReverseMap();
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace ECommerce.API.Dtos
 {
-    public class CreateOrderResponseDto
+    public class OrderResponseDto
     {
         public string OrderId { get; set; }
         public decimal Amount { get; set; }
