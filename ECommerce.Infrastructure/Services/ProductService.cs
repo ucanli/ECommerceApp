@@ -23,38 +23,50 @@ namespace ECommerce.Infrastructure.Services
 
         public async Task<List<ProductDto>> GetProductsAsync()
         {
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "api/products");
+            var httpClient = _httpClientFactory.CreateClient("balance-management-api");
+
             try
             {
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "api/products");
-
-                var httpClient = _httpClientFactory.CreateClient("balance-management-api");
                 var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
 
-                if (httpResponseMessage.IsSuccessStatusCode)
+                if (!httpResponseMessage.IsSuccessStatusCode)
                 {
-                    await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
-
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    };
-
-                    var response = await JsonSerializer.DeserializeAsync<ApiResponse<List<BalanceApiProductDto>>>(contentStream, options);
-
-                    if (response?.Data != null)
-                    {
-                        var result = _mapper.Map<List<ProductDto>>(response.Data);
-                        return result;
-                    }
+                    throw new HttpRequestException($"Balance API failed with status code {httpResponseMessage.StatusCode}");
                 }
 
-                return new List<ProductDto>();
+                await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var response = await JsonSerializer.DeserializeAsync<ApiResponse<List<BalanceApiProductDto>>>(contentStream, options);
+
+                if (response?.Success == false || response?.Data == null)
+                {
+                    return new List<ProductDto>();
+                }
+
+                return _mapper.Map<List<ProductDto>>(response.Data);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error while fetching products.");
+                throw;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "JSON deserialization error while fetching products.");
+                throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to fetch products. ErrorMessage: {ex.Message}");
-                return new List<ProductDto>();
+                _logger.LogError(ex, "Unexpected error while fetching products.");
+                throw;
             }
         }
+
     }
 }

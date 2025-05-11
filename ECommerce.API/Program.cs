@@ -25,6 +25,7 @@ var appSettings = builder.Configuration
 
 // Add services to the container.
 builder.Services.AddControllers();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -111,11 +112,11 @@ builder.Services.AddScoped<IProductManager, ProductManager>();
 builder.Services.AddScoped<IOrderManager,  OrderManager>();
 
 
-
 var app = builder.Build();
 
 // Middleware
 app.UseMiddleware<ApiKeyMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

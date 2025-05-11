@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
 using ECommerce.API.Dtos;
-using ECommerce.API.DTOs;
 using ECommerce.Application.Commands;
-using ECommerce.Application.Dtos;
-using ECommerce.Application.DTOs;
 using ECommerce.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,11 +27,8 @@ namespace ECommerce.API.Controllers
         public async Task<IActionResult> Create([FromBody] CreateOrderRequestDto request)
         {
             var command = _mapper.Map<CreateOrderCommand>(request);
-
             var orderDto = await _orderManager.CreateOrderAsync(command);
-
             var response = _mapper.Map<OrderResponseDto>(orderDto);
-
 
             return Ok(response);
         }
