@@ -6,6 +6,7 @@ namespace ECommerce.Domain.Enums
     {
         Blocked,
         Completed,
-        Cancelled
+        Cancelled,
+        Created
     }
 }
