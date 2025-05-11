@@ -5,6 +5,7 @@ using ECommerce.Infrastructure.Services.Dtos;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ECommerce.Infrastructure.Services
 {
@@ -59,7 +60,7 @@ namespace ECommerce.Infrastructure.Services
             }
         }
 
-        public async Task<PreOrderDto> PrePrder(string orderId, decimal amount)
+        public async Task<PreOrderDto> PrePrderAsync(string orderId, decimal amount)
         {
             try
             {
@@ -74,14 +75,17 @@ namespace ECommerce.Infrastructure.Services
 
                 if (httpResponseMessage.IsSuccessStatusCode)
                 {
-                    await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+                    var contentStream = await httpResponseMessage.Content.ReadAsStringAsync();
 
                     var options = new JsonSerializerOptions
                     {
-                        PropertyNameCaseInsensitive = true
+                        PropertyNameCaseInsensitive = true,
                     };
+                    options.Converters.Add(new JsonStringEnumConverter());
 
-                    var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiPreOrderDto>>(contentStream, options);
+                    Console.WriteLine(contentStream);
+
+                    var response = JsonSerializer.Deserialize<ApiResponse<BalanceApiPreOrderDto>>(contentStream, options);
 
                     if (response?.Data != null)
                     {
@@ -100,7 +104,7 @@ namespace ECommerce.Infrastructure.Services
         }
 
 
-        public async Task<CompleteDto> Complete(string orderId)
+        public async Task<CompleteDto> CompleteAsync(string orderId)
         {
             try
             {
@@ -140,7 +144,7 @@ namespace ECommerce.Infrastructure.Services
             }
         }
 
-        public async Task<CancelDto> Cancel(string orderId)
+        public async Task<CancelDto> CancelAsync(string orderId)
         {
             try
             {

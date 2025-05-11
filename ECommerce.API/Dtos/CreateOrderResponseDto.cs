@@ -1,0 +1,13 @@
+﻿using ECommerce.Domain.Enums;
+
+namespace ECommerce.API.Dtos
+{
+    public class CreateOrderResponseDto
+    {
+        public string OrderId { get; set; }
+        public decimal Amount { get; set; }
+        public DateTime Timestamp { get; set; }
+        public OrderStatus Status { get; set; }
+        public string UserId { get; set; }
+    }
+}
