@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  ecommerce-api:
+    build:
+      context: .
+      dockerfile: ECommerce.API/Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
