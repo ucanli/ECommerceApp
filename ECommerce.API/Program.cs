@@ -1,3 +1,4 @@
+using ECommerce.API.Middleware;
 using ECommerce.API.Settings;
 using ECommerce.Application.Interfaces.External;
 using ECommerce.Application.Interfaces.Persistence;
@@ -89,6 +90,9 @@ builder.Services.AddScoped<IOrderManager,  OrderManager>();
 
 
 var app = builder.Build();
+
+// Middleware
+app.UseMiddleware<ApiKeyMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
