@@ -76,7 +76,7 @@ namespace ECommerce.Application.Services
             }
 
             //Creates a pre-order and blocks the specified amount
-            var preOrder = await _balanceService.PrePrderAsync(orderEntity.Id, orderEntity.TotalAmount);
+            var preOrder = await _balanceService.PreOrderAsync(orderEntity.Id, orderEntity.TotalAmount);
 
             if (preOrder == null) {
                 throw new ArgumentException("pre order not successful");

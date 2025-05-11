@@ -9,187 +9,65 @@ using System.Text.Json.Serialization;
 
 namespace ECommerce.Infrastructure.Services
 {
-    public class BalanceService : IBalanceService
+    public class BalanceService : ExternalApiServiceBase, IBalanceService
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ProductService> _logger;
 
         private readonly IMapper _mapper;
 
-        public BalanceService(IHttpClientFactory httpClientFactory, ILogger<ProductService> logger, IMapper mapper)
+        public BalanceService(IHttpClientFactory httpClientFactory, ILogger<ProductService> logger, IMapper mapper) : base(httpClientFactory, logger)
         {
             _httpClientFactory = httpClientFactory;
             _mapper = mapper;
             _logger = logger;
         }
 
-
         public async Task<UserBalanceDto> GetUserBalanceAsync()
         {
-            try
-            {
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "api/balance");
-
-                var httpClient = _httpClientFactory.CreateClient("balance-management-api");
-                var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
-
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    };
-
-                    var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiUserBalanceDto>>(contentStream, options);
-
-                    if (response?.Data != null)
-                    {
-                        var result = _mapper.Map<UserBalanceDto>(response.Data);
-                        return result;
-                    }
-                }
-
-                return new UserBalanceDto();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Failed to fetch products. ErrorMessage: {ex.Message}");
-                return new UserBalanceDto();
-            }
+            var request = new HttpRequestMessage(HttpMethod.Get, "api/balance");
+            var data = await SendRequestAsync<BalanceApiUserBalanceDto>("balance-management-api", request, "GetUserBalance");
+            return data != null ? _mapper.Map<UserBalanceDto>(data) : new UserBalanceDto();
         }
 
-        public async Task<PreOrderDto> PrePrderAsync(string orderId, decimal amount)
+        public async Task<PreOrderDto> PreOrderAsync(string orderId, decimal amount)
         {
-            try
+            var body = JsonSerializer.Serialize(new { orderId, amount });
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/balance/preorder")
             {
-                var jsonReuest = JsonSerializer.Serialize(new { orderId, amount });
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
 
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "api/balance/preorder");
-                httpRequestMessage.Content = new StringContent(jsonReuest, Encoding.UTF8, "application/json");
-
-                var httpClient = _httpClientFactory.CreateClient("balance-management-api");
-
-                var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    var contentStream = await httpResponseMessage.Content.ReadAsStringAsync();
-
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                    };
-                    options.Converters.Add(new JsonStringEnumConverter());
-
-                    Console.WriteLine(contentStream);
-
-                    var response = JsonSerializer.Deserialize<ApiResponse<BalanceApiPreOrderDto>>(contentStream, options);
-
-                    if (response?.Data != null)
-                    {
-                        var result = _mapper.Map<PreOrderDto>(response.Data);
-                        return result;
-                    }
-                }
-
-                return new PreOrderDto();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Failed to post preorder. ErrorMessage: {ex.Message}");
-                return new PreOrderDto();
-            }
+            var data = await SendRequestAsync<BalanceApiPreOrderDto>("balance-management-api", request, "PreOrder");
+            return data != null ? _mapper.Map<PreOrderDto>(data) : new PreOrderDto();
         }
-
 
         public async Task<CompleteDto> CompleteAsync(string orderId)
         {
-            try
+            var body = JsonSerializer.Serialize(new { orderId });
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/balance/complete")
             {
-                var jsonReuest = JsonSerializer.Serialize(new { orderId });
+                Content = new StringContent(body, Encoding.UTF8, "application/json")
+            };
 
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "api/balance/complete");
-                httpRequestMessage.Content = new StringContent(jsonReuest, Encoding.UTF8, "application/json");
-
-                var httpClient = _httpClientFactory.CreateClient("balance-management-api");
-
-                var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    var contentStream = await httpResponseMessage.Content.ReadAsStringAsync();
-
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                    };
-                    options.Converters.Add(new JsonStringEnumConverter());
-
-                    Console.WriteLine(contentStream);
-
-                    var response =  JsonSerializer.Deserialize<ApiResponse<BalanceApiCompleteDto>>(contentStream, options);
-
-                    if (response?.Data != null)
-                    {
-                        var result = _mapper.Map<CompleteDto>(response.Data);
-                        return result;
-                    }
-                }
-
-                return new CompleteDto();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Failed to post complate. ErrorMessage: {ex.Message}");
-                return new CompleteDto();
-            }
+            var data = await SendRequestAsync<BalanceApiCompleteDto>("balance-management-api", request, "Complete");
+            return data != null ? _mapper.Map<CompleteDto>(data) : new CompleteDto();
         }
 
         public async Task<CancelDto> CancelAsync(string orderId)
         {
-            try
+            var requestBody = JsonSerializer.Serialize(new { orderId });
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, "api/balance/cancel")
             {
-                var jsonReuest = JsonSerializer.Serialize(new { orderId });
+                Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+            };
 
-                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "api/balance/cencel");
-                httpRequestMessage.Content = new StringContent(jsonReuest, Encoding.UTF8, "application/json");
+            var response = await SendRequestAsync<BalanceApiCancelDto>("balance-management-api",requestMessage, "Cancel");
 
-                var httpClient = _httpClientFactory.CreateClient("balance-management-api");
-
-                var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    var contentStream = await httpResponseMessage.Content.ReadAsStringAsync();
-
-                    var options = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                    };
-                    options.Converters.Add(new JsonStringEnumConverter());
-
-                    Console.WriteLine(contentStream);
-
-
-                    var response = JsonSerializer.Deserialize<ApiResponse<BalanceApiCancelDto>>(contentStream, options);
-
-
-                    if (response?.Data != null)
-                    {
-                        var result = _mapper.Map<CancelDto>(response.Data);
-                        return result;
-                    }
-                }
-
-                return new CancelDto();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Failed to post cancel. ErrorMessage: {ex.Message}");
-                return new CancelDto();
-            }
+            return response != null
+                ? _mapper.Map<CancelDto>(response)
+                : new CancelDto();
         }
 
     }
