@@ -24,6 +24,8 @@ namespace ECommerce.Infrastructure.Services
 
             _logger = logger;
         }
+
+
         public async Task<BalanceApiUserBalanceDto> GetUserBalanceAsync()
         {
             try
@@ -91,5 +93,79 @@ namespace ECommerce.Infrastructure.Services
                 return new BalanceApiPreOrderDto();
             }
         }
+
+
+        public async Task<BalanceApiCompleteDto> Complete(string orderId)
+        {
+            try
+            {
+                var jsonReuest = JsonSerializer.Serialize(new { orderId });
+
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "api/balance/complete");
+                httpRequestMessage.Content = new StringContent(jsonReuest, Encoding.UTF8, "application/json");
+
+                var httpClient = _httpClientFactory.CreateClient("balance-management-api");
+
+                var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiCompleteDto>>(contentStream, options);
+
+                    return response?.Data ?? new BalanceApiCompleteDto();
+                }
+
+                return new BalanceApiCompleteDto();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to post complate. ErrorMessage: {ex.Message}");
+                return new BalanceApiCompleteDto();
+            }
+        }
+
+        public async Task<BalanceApiCancelDto> Cancel(string orderId)
+        {
+            try
+            {
+                var jsonReuest = JsonSerializer.Serialize(new { orderId });
+
+                var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, "api/balance/cencel");
+                httpRequestMessage.Content = new StringContent(jsonReuest, Encoding.UTF8, "application/json");
+
+                var httpClient = _httpClientFactory.CreateClient("balance-management-api");
+
+                var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
+
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    await using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    var response = await JsonSerializer.DeserializeAsync<ApiResponse<BalanceApiCancelDto>>(contentStream, options);
+
+                    return response?.Data ?? new BalanceApiCancelDto();
+                }
+
+                return new BalanceApiCancelDto();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to post cancel. ErrorMessage: {ex.Message}");
+                return new BalanceApiCancelDto();
+            }
+        }
+
     }
 }
