@@ -27,6 +27,22 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "Backend system for processing orders with Balance Management integration."
     });
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "API Key needed to access the endpoints.",
+        In = ParameterLocation.Header,
+        Name = "X-API-KEY",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "ApiKeyScheme"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+                { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKey" } },
+            new string[] { }
+        }
+    });
 });
 
 
