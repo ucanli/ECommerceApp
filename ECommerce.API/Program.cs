@@ -1,5 +1,7 @@
+using ECommerce.API.Dtos;
 using ECommerce.API.Middleware;
 using ECommerce.API.Settings;
+using ECommerce.API.Validators;
 using ECommerce.Application.Interfaces.Concurrency;
 using ECommerce.Application.Interfaces.External;
 using ECommerce.Application.Interfaces.Persistence;
@@ -7,10 +9,13 @@ using ECommerce.Application.Interfaces.Services;
 using ECommerce.Application.Services;
 using ECommerce.Infrastructure.Repositories;
 using ECommerce.Infrastructure.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.OpenApi.Models;
 using Polly;
 using Serilog;
+using System;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,13 +30,14 @@ var appSettings = builder.Configuration
     .Get<AppSettings>();
 
 
-// Add services to the container.
 builder.Services.AddControllers()
         .AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
+builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderRequestValidator>();
+builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

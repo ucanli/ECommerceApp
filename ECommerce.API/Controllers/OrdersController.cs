@@ -3,6 +3,7 @@ using ECommerce.API.Dtos;
 using ECommerce.Application.Commands;
 using ECommerce.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace ECommerce.API.Controllers
@@ -39,7 +40,7 @@ namespace ECommerce.API.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> Complete(string id)
+        public async Task<IActionResult> Complete([Required] string id)
         {
             var complateDto = await _orderManager.CompleteOrderAsync(id);
             var response = _mapper.Map<CompleteOrderResponseDto>(complateDto);
