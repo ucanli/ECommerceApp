@@ -11,6 +11,8 @@ using ECommerce.Infrastructure.Repositories;
 using ECommerce.Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.OpenApi.Models;
 using Polly;
@@ -74,7 +76,7 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
         //Retry
         builder.AddRetry(new HttpRetryStrategyOptions
         {
-            MaxRetryAttempts = 3,
+            MaxRetryAttempts = 5,
             Delay = TimeSpan.FromSeconds(1),
             BackoffType = DelayBackoffType.Exponential,
             OnRetry = args =>
@@ -118,7 +120,19 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddSingleton<ILockProvider, LockProvider>();
-builder.Services.AddSingleton<IOrderRepository, InMemoryOrderRepository>();
+builder.Services.AddSingleton<IOrderRepository, InMemoryOrderDictionaryRepository>();
+
+
+var connection = new SqliteConnection("datasource=:memory:");
+connection.Open();
+
+builder.Services.AddDbContext<ECommerceDbContext>(options =>
+{
+    options.UseSqlite(connection);
+});
+
+builder.Services.AddScoped<IOrderRepository, InMemorySqliteRepository>();
+
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBalanceService, BalanceService>();
 builder.Services.AddScoped<IProductManager, ProductManager>();
@@ -126,6 +140,15 @@ builder.Services.AddScoped<IOrderManager,  OrderManager>();
 
 
 var app = builder.Build();
+
+// Ensure the in-memory SQLite database is created
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ECommerceDbContext>();
+    dbContext.Database.EnsureCreated();  // Veritabaný ve tablolarý oluþturuyor
+
+
+}
 
 // Middleware
 app.UseMiddleware<ApiKeyMiddleware>();

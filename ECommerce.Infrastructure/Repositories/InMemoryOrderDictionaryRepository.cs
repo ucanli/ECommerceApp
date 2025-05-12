@@ -3,7 +3,7 @@ using ECommerce.Domain.Entities;
 
 namespace ECommerce.Infrastructure.Repositories
 {
-    public class InMemoryOrderRepository : IOrderRepository
+    public class InMemoryOrderDictionaryRepository : IOrderRepository
     {
         private readonly Dictionary<string, Order> _orders = new();
 
