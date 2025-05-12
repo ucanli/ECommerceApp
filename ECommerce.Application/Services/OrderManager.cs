@@ -1,6 +1,7 @@
 ﻿using ECommerce.Application.Commands;
 using ECommerce.Application.Dtos;
 using ECommerce.Application.Exceptions;
+using ECommerce.Application.Interfaces.Concurrency;
 using ECommerce.Application.Interfaces.External;
 using ECommerce.Application.Interfaces.Persistence;
 using ECommerce.Application.Interfaces.Services;
@@ -20,17 +21,31 @@ namespace ECommerce.Application.Services
         private readonly IProductService _productService;
         private readonly IBalanceService _balanceService;
         private readonly IOrderRepository _orderRepository;
+        private readonly ILockProvider _lockProvider;
         private readonly ILogger<OrderManager> _logger;
 
-        public OrderManager(IProductService productService, IBalanceService balanceService, IOrderRepository orderRepository, ILogger<OrderManager> logger)
+        public OrderManager(IProductService productService, IBalanceService balanceService, IOrderRepository orderRepository, ILogger<OrderManager> logger, ILockProvider lockProvider)
         {
             _productService = productService;
             _balanceService = balanceService;
             _orderRepository = orderRepository;
+            _lockProvider = lockProvider;
             _logger = logger;
         }
 
         public async Task<OrderDto> CreateOrderAsync(CreateOrderCommand command)
+        {
+            OrderDto result = null;
+
+            await _lockProvider.ExecuteWithLockAsync($"order-lock:{command.UserId}", async () =>
+            {
+                result = await CreateOrderInternalAsync(command);
+            });
+
+            return result;
+        }
+
+        private async Task<OrderDto> CreateOrderInternalAsync(CreateOrderCommand command)
         {
             var orderEntity = new Order();
 
@@ -132,7 +147,23 @@ namespace ECommerce.Application.Services
             _logger.LogInformation($"Order {orderId} rollbacked.");
         }
 
+
         public async Task<CompleteDto> CompleteOrderAsync(string orderId)
+        {
+
+            //await TestLockProvider();
+
+            CompleteDto result = null;
+
+            await _lockProvider.ExecuteWithLockAsync($"complete-lock:{orderId}", async () =>
+            {
+                result = await CompleteOrderInternalAsync(orderId);
+            });
+
+            return result;
+        }
+
+        private async Task<CompleteDto> CompleteOrderInternalAsync(string orderId)
         {
             try
             {
@@ -174,6 +205,36 @@ namespace ECommerce.Application.Services
 
                 throw new ApplicationException($"Unexpected error while complete order: {ex.Message}", ex);
             }
+        }
+
+        private async Task TestLockProvider()
+        {
+
+            var tasks = new Task[5];
+
+            for (int i = 0; i < 5; i++)
+            {
+                int id = i;
+                tasks[i] = Task.Run(async () =>
+                {
+                    var key = "user-123";
+                    try
+                    {
+                        await _lockProvider.ExecuteWithLockAsync(key, async () =>
+                        {
+                            Console.WriteLine($"[{id}] Lock acquired, processing...");
+                            await Task.Delay(3000);
+                            Console.WriteLine($"[{id}] Done.");
+                        });
+                    }
+                    catch (TooManyRequestsException ex)
+                    {
+                        Console.WriteLine($"[{id}] Failed to acquire lock: {ex.Message}");
+                    }
+                });
+            }
+
+            await Task.WhenAll(tasks);
         }
     }
 }

@@ -1,5 +1,6 @@
 using ECommerce.API.Middleware;
 using ECommerce.API.Settings;
+using ECommerce.Application.Interfaces.Concurrency;
 using ECommerce.Application.Interfaces.External;
 using ECommerce.Application.Interfaces.Persistence;
 using ECommerce.Application.Interfaces.Services;
@@ -110,6 +111,7 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddSingleton<ILockProvider, LockProvider>();
 builder.Services.AddSingleton<IOrderRepository, InMemoryOrderRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBalanceService, BalanceService>();
