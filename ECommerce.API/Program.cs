@@ -120,7 +120,7 @@ builder.Services.AddHttpClient("balance-management-api", (serviceProvider, clien
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddSingleton<ILockProvider, LockProvider>();
-builder.Services.AddSingleton<IOrderRepository, InMemoryOrderDictionaryRepository>();
+//builder.Services.AddSingleton<IOrderRepository, InMemoryOrderDictionaryRepository>();
 
 
 var connection = new SqliteConnection("datasource=:memory:");
